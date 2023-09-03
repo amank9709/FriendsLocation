@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/phone_number_input_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="25dp"
+        android:textAlignment="center"
+        android:background="?selectableItemBackground"
+        android:layout_marginTop="20dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/phone_number"
+            android:drawableStart="@drawable/phone_drawable_start"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="textStart"
+            android:inputType="number"
+            android:maxLength="10"
+            android:hint="Enter your phone number" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/Otp_input_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="25dp"
+        android:textAlignment="center"
+        android:visibility="gone"
+        android:background="?selectableItemBackground"
+        android:layout_below="@id/phone_number_input_layout"
+        android:layout_marginTop="20dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/Otp_number"
+            android:drawableStart="@drawable/otp_drawable_start"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="textStart"
+            android:inputType="number"
+            android:maxLength="10"
+            android:hint="Enter the Received OTP" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+    <Button
+        android:id="@+id/login_button"
+        android:layout_width="match_parent"
+        android:background="#58AAD0"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/Otp_input_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="25dp"
+        android:layout_marginTop="15dp"
+        android:text="Login" />
+
+    <Button
+        android:id="@+id/Otp_buttonn"
+        android:layout_width="match_parent"
+        android:background="#58AAD0"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/login_button"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="25dp"
+        android:layout_marginTop="15dp"
+        android:text="Verify" />
+
+</RelativeLayout>

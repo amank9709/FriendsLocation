@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <fragment
+        android:id="@+id/maps"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ImageButton
+        android:id="@+id/LocationFinderBtn"
+        android:background="@drawable/round_shape"
+        android:layout_width="35sp"
+        android:layout_height="35sp"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="15sp"
+        android:onClick="getCurrentLocationOnMap"
+        android:src="@drawable/location_search_black"/>
+
+</FrameLayout>
