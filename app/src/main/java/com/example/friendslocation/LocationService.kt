@@ -5,10 +5,13 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.location.Location
+import android.os.Bundle
 import android.os.IBinder
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.location.LocationServices
+import com.google.android.play.integrity.internal.l
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -16,6 +19,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+
 
 class LocationService : Service(){
 
@@ -56,6 +60,7 @@ class LocationService : Service(){
         locationClient.getLiveLocationUpdates(5000L)
             .catch { e ->e.printStackTrace();  Toast.makeText(this@LocationService,"Error Occured in Notification: $e", Toast.LENGTH_LONG).show() }
             .onEach { location: Location ->
+                sendLocationUpdatesToActivity(location);
                 val lat = location.latitude.toString()
                 val long = location.longitude.toString()
                 val updatedNotification = notification.setContentText("Location : ($lat, $long)")
@@ -67,6 +72,15 @@ class LocationService : Service(){
         startForeground(1, notification.build())
 
     }
+
+    private fun sendLocationUpdatesToActivity(location: Location) {
+        val intent = Intent("GPSLocationUpdates")
+        val b = Bundle()
+        b.putParcelable("Location", location)
+        intent.putExtra("Location", b)
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+    }
+
     private fun stop(){
         stopForeground(true)
     }

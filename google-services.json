@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "77042882020",
+    "firebase_url": "https://friendslocation-86b3f-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "friendslocation-86b3f",
     "storage_bucket": "friendslocation-86b3f.appspot.com"
   },
@@ -13,6 +14,22 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "77042882020-co6ralmuqc6045e1o5vc8ok55uhlqmuh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.friendslocation",
+            "certificate_hash": "7dd9ad852485d48d87642cd2c47219d4f203619f"
+          }
+        },
+        {
+          "client_id": "77042882020-uk92423vpl1udeoss9f4j76td5uhin1i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.friendslocation",
+            "certificate_hash": "caedac862be6090e0e21ba307b1094ccb3a807c9"
+          }
+        },
         {
           "client_id": "77042882020-50ftl6ptd627g5e2d5ijvalohpe0pafd.apps.googleusercontent.com",
           "client_type": 3
