@@ -9,13 +9,15 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
-import android.os.Parcelable
+import android.util.TypedValue
 import android.view.View
-import android.widget.ImageButton
+import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.example.friendslocation.HelperClasses.LocationHelper
+import com.example.friendslocation.Services.LocationService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -23,9 +25,12 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ServerValue
+import com.google.firebase.database.ValueEventListener
 
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -35,110 +40,130 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private var maps: GoogleMap? = null
-    private lateinit var CurrLocImgBtn: ImageButton
     private lateinit var firebaseAuth: FirebaseAuth
-    private var mFirebaseDatabaseInstances: FirebaseDatabase? = null
-    private var context: Context? = null;
     private lateinit var locationHelper: LocationHelper
+    private lateinit var markerOptions: MarkerOptions
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        InitializeComponenets()
-        this.context = this;
-        locationHelper = LocationHelper(this);
-        mMapFragment = supportFragmentManager.findFragmentById(R.id.maps) as SupportMapFragment
-        mMapFragment.getMapAsync(this)
-
-
+        initializeComponents()
+        setUpMap()
     }
 
-    private fun InitializeComponenets() {
+    private fun initializeComponents() {
+        locationHelper = LocationHelper(this)
         firebaseAuth = FirebaseAuth.getInstance()
+        markerOptions = MarkerOptions()
+
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-        CurrLocImgBtn = findViewById(R.id.LocationFinderBtn)
         LocalBroadcastManager.getInstance(this).registerReceiver(
-            mMessageReceiver,  IntentFilter("GPSLocationUpdates")
-        );
+            mMessageReceiver, IntentFilter("GPSLocationUpdates")
+        )
+    }
+
+    @SuppressLint("ResourceType")
+    private fun setUpMap() {
+
+        // Find myLocationButton view
+        mMapFragment = (supportFragmentManager.findFragmentById(R.id.maps) as SupportMapFragment?)!!
+        mMapFragment.getMapAsync(this)
+        val myLocationButton = mMapFragment.view?.findViewById<View>(0x2)
+        if (myLocationButton != null && myLocationButton.layoutParams is RelativeLayout.LayoutParams) {
+            // location button is inside of RelativeLayout
+            val params = myLocationButton.layoutParams as RelativeLayout.LayoutParams
+
+            // Align it to - parent BOTTOM|LEFT
+            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+            params.addRule(RelativeLayout.ALIGN_PARENT_LEFT)
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0)
+            params.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0)
+
+            // Update margins, set to 10dp
+            val margin = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 10f,
+                resources.displayMetrics
+            ).toInt()
+            params.setMargins(margin, margin, margin, margin)
+            myLocationButton.layoutParams = params
+        }
     }
 
     private val mMessageReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             // Get extra data included in the Intent
-            val message = intent.getStringExtra("Status")
             val b = intent.getBundleExtra("Location")
-            val location  = b?.getParcelable<Location>("Location")
+            val location = b?.getParcelable<Location>("Location")
             val latLng = location?.let { LatLng(it.latitude, location.longitude) }
             latLng?.let { CameraUpdateFactory.newLatLngZoom(it, 15f) }?.let { maps?.moveCamera(it) }
-            //Toast.makeText(this@MainActivity, "Location : ${b.toString()}",Toast.LENGTH_SHORT ).show()
 
-            // Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         }
     }
+
     override fun onMapReady(map: GoogleMap) {
         this.maps = map
 
-        //getLocationPermission()
-        //getCurrentLocation()
         if (locationHelper.checkLocationPermission())
-            getLiveLocation();
+            getLiveLocation()
         else
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION
-            )
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION )
 
-        maps!!.setOnCameraIdleListener {
-
-        }
     }
 
 
     @SuppressLint("MissingPermission")
     private fun getLiveLocation() {
-//        maps?.isMyLocationEnabled = true
-//        fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
-//            if (location != null) {
-//                val latLng = LatLng(location.latitude, location.longitude)
-//                maps?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
-//            }
-//
-//        }
-        Intent(applicationContext,LocationService::class.java).apply {
+        Intent(applicationContext, LocationService::class.java).apply {
             action = LocationService.ACTION_START
             startService(this)
         }
+        maps?.isMyLocationEnabled = true
+        showOthersLocation()
     }
 
-
-
-    private fun updateLastKnowLocation(latitude: Double, longitude: Double) {
-        Toast.makeText(this, "Updating last known location", Toast.LENGTH_SHORT).show()
-        mFirebaseDatabaseInstances =
+    private fun showOthersLocation() {
+        val databaseReference =
             FirebaseDatabase.getInstance("https://friendslocation-86b3f-default-rtdb.asia-southeast1.firebasedatabase.app")
+                .getReference("LiveLocation")
+        databaseReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                //Toast.makeText(this@MainActivity,"Data: ${snapshot.child("CPKRbPa1qCOnxjRbZbNN4cxQra12").child("latitude")}", Toast.LENGTH_LONG).show()
+                val latitude = snapshot.child("CPKRbPa1qCOnxjRbZbNN4cxQra12").child("latitude")
+                    .getValue() as Double
+                val longitude = snapshot.child("CPKRbPa1qCOnxjRbZbNN4cxQra12").child("longitude")
+                    .getValue() as Double
+                val latLng = LatLng(latitude, longitude)
+                Toast.makeText(
+                    this@MainActivity,
+                    "lat: $latitude , long: $longitude",
+                    Toast.LENGTH_LONG
+                ).show()
 
-        var databaseReference = mFirebaseDatabaseInstances!!.getReference("LiveLocation")
-        val userId = FirebaseAuth.getInstance().currentUser!!.uid
-        val timestamp = ServerValue.TIMESTAMP
+                updateMarkerInMap(latLng)
+            }
 
-        val data = hashMapOf(
-            "latitude" to latitude,
-            "longitude" to longitude,
-            "timestamp" to timestamp
-        )
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(this@MainActivity, "Data: $error", Toast.LENGTH_LONG).show()
+            }
 
-        databaseReference!!.child(userId).setValue(data).addOnSuccessListener {
-            Toast.makeText(this, "Success $it", Toast.LENGTH_SHORT).show()
+        })
+    }
 
-        }.addOnFailureListener {
-            Toast.makeText(this, "Failure $it", Toast.LENGTH_SHORT).show()
+    private fun updateMarkerInMap(latLng: LatLng) {
 
-        }
+        maps?.addMarker(markerOptions.position(latLng))
 
     }
 
+
+    override fun onPause() {
+        super.onPause()
+        Intent(applicationContext, LocationService::class.java).apply {
+            action = LocationService.ACTION_STOP
+            startService(this)
+        }
+    }
 
     /**
      * Handles the result of the request for location permissions.
@@ -148,22 +173,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     ) {
         when (requestCode) {
             PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
-
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     getLiveLocation()
                 }
             }
-
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
-    fun getCurrentLocationOnMap(view: View) {
-        CurrLocImgBtn.setImageDrawable(getDrawable(R.drawable.location_seach_blue))
-        getLiveLocation()
-
-    }
 }
 

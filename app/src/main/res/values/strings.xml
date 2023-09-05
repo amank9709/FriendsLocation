@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">FriendsLocation</string>
     <string name="title_activity_login">LoginActivity</string>
+    <string name="login">Send OTP</string>
+    <string name="verify">Verify</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="search_places">Search Places</string>
 </resources>

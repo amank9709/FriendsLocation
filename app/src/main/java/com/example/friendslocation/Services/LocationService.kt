@@ -1,4 +1,4 @@
-package com.example.friendslocation
+package com.example.friendslocation.Services
 
 import android.app.NotificationManager
 import android.app.Service
@@ -10,8 +10,11 @@ import android.os.IBinder
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.example.friendslocation.Interfaces.LocationClient
+import com.example.friendslocation.LocationFetcherClient
+import com.example.friendslocation.HelperClasses.LocationHelper
+import com.example.friendslocation.R
 import com.google.android.gms.location.LocationServices
-import com.google.android.play.integrity.internal.l
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -25,6 +28,7 @@ class LocationService : Service(){
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO )
     private lateinit var locationClient: LocationClient;
+    private lateinit var locationHelper: LocationHelper;
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -36,7 +40,9 @@ class LocationService : Service(){
             this,
             LocationServices.getFusedLocationProviderClient(this)
         )
+        locationHelper = LocationHelper(this)
     }
+
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -61,6 +67,7 @@ class LocationService : Service(){
             .catch { e ->e.printStackTrace();  Toast.makeText(this@LocationService,"Error Occured in Notification: $e", Toast.LENGTH_LONG).show() }
             .onEach { location: Location ->
                 sendLocationUpdatesToActivity(location);
+                locationHelper.updateLastKnowLocation(location)
                 val lat = location.latitude.toString()
                 val long = location.longitude.toString()
                 val updatedNotification = notification.setContentText("Location : ($lat, $long)")

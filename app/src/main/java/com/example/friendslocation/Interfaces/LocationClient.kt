@@ -1,4 +1,4 @@
-package com.example.friendslocation
+package com.example.friendslocation.Interfaces
 
 import android.location.Location
 import kotlinx.coroutines.flow.Flow

@@ -11,19 +11,27 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_margin="25dp"
+
+        app:boxCornerRadiusBottomStart="10dp"
+        app:boxCornerRadiusBottomEnd="10dp"
+        app:boxCornerRadiusTopEnd="10dp"
+        app:boxCornerRadiusTopStart="10dp"
         android:textAlignment="center"
-        android:background="?selectableItemBackground"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="200dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/phone_number"
             android:drawableStart="@drawable/phone_drawable_start"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAlignment="textStart"
             android:inputType="number"
             android:maxLength="10"
-            android:hint="Enter your phone number" />
+            android:lines="1"
+            android:textAlignment="center"
+            android:drawablePadding="10dp"
+            android:hint="@string/phone_number" />
+
+
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -46,6 +54,7 @@
             android:textAlignment="textStart"
             android:inputType="number"
             android:maxLength="10"
+            android:drawablePadding="10dp"
             android:hint="Enter the Received OTP" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -53,13 +62,16 @@
     <Button
         android:id="@+id/login_button"
         android:layout_width="match_parent"
-        android:background="#58AAD0"
         android:layout_height="wrap_content"
         android:layout_below="@id/Otp_input_layout"
         android:layout_centerHorizontal="true"
-        android:layout_margin="25dp"
-        android:layout_marginTop="15dp"
-        android:text="Login" />
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="25dp"
+        android:layout_marginBottom="25dp"
+        android:background="@drawable/rounded_corner"
+
+        android:text="@string/login" />
 
     <Button
         android:id="@+id/Otp_buttonn"
@@ -71,6 +83,6 @@
         android:layout_centerHorizontal="true"
         android:layout_margin="25dp"
         android:layout_marginTop="15dp"
-        android:text="Verify" />
+        android:text="@string/verify" />
 
 </RelativeLayout>

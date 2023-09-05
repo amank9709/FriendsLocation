@@ -1,4 +1,4 @@
-package com.example.friendslocation
+package com.example.friendslocation.HelperClasses
 
 import android.app.Application
 import android.app.NotificationChannel
