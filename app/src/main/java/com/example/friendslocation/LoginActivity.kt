@@ -3,9 +3,11 @@ package com.example.friendslocation
 import android.os.Bundle
 
 import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.friendslocation.Fragments.LoginFragment
 import com.example.friendslocation.Fragments.OtpFragment
+import com.google.android.material.textfield.TextInputEditText
 
 class LoginActivity : AppCompatActivity() {
 
@@ -26,8 +28,17 @@ class LoginActivity : AppCompatActivity() {
         otpFragment = OtpFragment()
 
         supportFragmentManager.beginTransaction().apply {
-            replace(R.id.flFragment,loginFragment)
+            replace(R.id.flFragment, loginFragment)
             commit()
+        }
+
+        val text: TextView
+        text = findViewById<TextView?>(R.id.appTV)
+        text.setOnClickListener{
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.flFragment, OtpFragment())
+                commit()
+            }
         }
 
     }
