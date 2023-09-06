@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         setUpMap()
     }
 
+
     private fun initializeComponents() {
         locationHelper = LocationHelper(this)
         firebaseAuth = FirebaseAuth.getInstance()
